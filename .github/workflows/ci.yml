@@ -1,0 +1,63 @@
+name: Fabrik CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test-fabrik:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install Fabrik (editable)
+        run: pip install -e .
+
+      - name: Verify CLI installed
+        run: fabrik --help
+
+      - name: Run self-test
+        run: fabrik test-self --keep
+
+      - name: Upload generated project (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failed-test-project
+          path: /tmp/scaffold-test-*
+          retention-days: 7
+
+  build-distribution:
+    runs-on: ubuntu-latest
+    needs: test-fabrik
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install build tools
+        run: pip install build twine
+
+      - name: Build sdist and wheel
+        run: python -m build
+
+      - name: Verify package metadata
+        run: twine check dist/*
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fabrik-distribution
+          path: dist/*
+          retention-days: 30

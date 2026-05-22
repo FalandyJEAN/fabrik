@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtualenv
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Fabrik
+# Le repertoire de test temporaire genere par `test-self --keep`
+scaffold-test-*/
+
+# Backups laisses par `scaffold.py upgrade`
+*.bak
+*.v*.bak

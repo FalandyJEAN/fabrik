@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<header class="page-head">
+    <div class="breadcrumbs">
+        <a href="/admin">{{ icon("home", 14) }}</a>
+        <span class="breadcrumb-sep">{{ icon("chevron-right", 12) }}</span>
+        <a href="/admin/{{ table }}">{{ table }}</a>
+        <span class="breadcrumb-sep">{{ icon("chevron-right", 12) }}</span>
+        <span>{% if is_new %}Nouveau{% else %}{{ item_id[:8] }}...{% endif %}</span>
+    </div>
+    <div class="page-title-row">
+        <div class="page-title-block">
+            <h1 class="page-title">{{ icon(table_icon(table), 22) }} <span>{{ title }}</span></h1>
+            <p class="page-sub">{% if is_new %}Renseignez les champs ci-dessous pour creer un enregistrement.{% else %}Modifiez les champs puis enregistrez.{% endif %}</p>
+        </div>
+        <div class="page-actions">
+            <a href="/admin/{{ table }}" class="btn btn-ghost">{{ icon("arrow-left", 14) }}<span>Retour</span></a>
+        </div>
+    </div>
+</header>
+
+<form method="post" action="{{ action }}" class="card model-form">
+    <div class="model-form-body">
+    {% for field in fields %}
+        <div class="form-row {% if field.type == 'checkbox' %}form-row-inline{% endif %}">
+            <label for="{{ field.name }}">
+                {{ field.name }}{% if field.required %} <span class="req" title="Requis">*</span>{% endif %}
+                {% if field.readonly %}<span class="hint">lecture seule</span>{% endif %}
+            </label>
+            {% if field.type == "checkbox" %}
+                <label class="checkbox-wrap">
+                    <input type="checkbox" id="{{ field.name }}" name="{{ field.name }}" {% if field.value %}checked{% endif %}>
+                    <span class="checkbox-label">Active</span>
+                </label>
+            {% elif field.type == "select" %}
+                <select id="{{ field.name }}" name="{{ field.name }}" {% if field.required %}required{% endif %} {% if field.readonly %}disabled{% endif %}>
+                    <option value="">&mdash; choisir &mdash;</option>
+                    {% for opt_val, opt_label in field.options %}
+                        <option value="{{ opt_val }}" {% if opt_val == field.value|string %}selected{% endif %}>{{ opt_label }}</option>
+                    {% endfor %}
+                </select>
+            {% else %}
+                <input type="{{ field.type }}"
+                       id="{{ field.name }}"
+                       name="{{ field.name }}"
+                       value="{{ field.value }}"
+                       {% if field.required %}required{% endif %}
+                       {% if field.readonly %}readonly{% endif %}
+                       {% if field.name == "password" and not is_new %}placeholder="Laissez vide pour ne pas changer"{% endif %}>
+            {% endif %}
+        </div>
+    {% endfor %}
+    </div>
+    <div class="form-actions">
+        <div class="form-actions-left">
+            {% if not is_new %}
+                <button type="submit" form="delete-form" class="btn btn-danger-ghost">{{ icon("trash", 14) }}<span>Supprimer</span></button>
+            {% endif %}
+        </div>
+        <div class="form-actions-right">
+            <a href="/admin/{{ table }}" class="btn btn-ghost">Annuler</a>
+            <button type="submit" class="btn btn-primary">{{ icon("save", 14) }}<span>Enregistrer</span></button>
+        </div>
+    </div>
+</form>
+{% if not is_new %}
+<form id="delete-form" method="post" action="/admin/{{ table }}/{{ item_id }}/delete"
+      onsubmit="return confirm('Supprimer definitivement ?')"></form>
+{% endif %}
+{% endblock %}

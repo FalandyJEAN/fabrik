@@ -1,0 +1,26 @@
+# Inclut tous les fichiers de /core/ dans la distribution source (sdist).
+# Necessaire car setuptools n'inclut pas les non-Python par defaut.
+recursive-include fabrik/core *
+recursive-include fabrik/core/.* *
+
+# Dotfiles dans core/ (essentiels pour les projets generes)
+include fabrik/core/.gitignore
+include fabrik/core/.env.example
+include fabrik/core/.dockerignore
+include fabrik/core/alembic/versions/.gitkeep
+
+# Meta du repo (pour la sdist)
+include README.md
+include LICENSE
+include ARCHITECTURE.md
+include pyproject.toml
+include MANIFEST.in
+recursive-include docs *.md
+
+# Exclusions
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude *.bak
+global-exclude .DS_Store
+prune .github
+prune tests

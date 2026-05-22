@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fabrik-cli"
+version = "1.0.0"
+description = "Generateur de projet FastAPI async + opinionated (auth JWT, admin UI, ARQ, tests)"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+    { name = "Falandy Jean", email = "falandyjean@gmail.com" },
+]
+requires-python = ">=3.13"
+keywords = [
+    "fastapi", "scaffold", "generator", "boilerplate",
+    "async", "sqlalchemy", "alembic", "admin", "jwt", "cli",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Code Generators",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+    "Framework :: FastAPI",
+    "Environment :: Console",
+]
+# Fabrik n'a aucune dependance runtime : c'est un generateur de code.
+# Les dependances (FastAPI, SQLAlchemy, ARQ...) sont installees DANS le
+# venv de chaque projet genere, pas dans le venv de Fabrik lui-meme.
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "build>=1.0",
+    "twine>=5.0",
+]
+
+[project.urls]
+Homepage      = "https://github.com/FalandyJEAN/fabrik"
+Repository    = "https://github.com/FalandyJEAN/fabrik"
+Documentation = "https://github.com/FalandyJEAN/fabrik/blob/main/docs/USAGE.md"
+Issues        = "https://github.com/FalandyJEAN/fabrik/issues"
+Changelog     = "https://github.com/FalandyJEAN/fabrik/releases"
+Logo          = "https://raw.githubusercontent.com/FalandyJEAN/fabrik/main/docs/assets/logo.png"
+
+[project.scripts]
+fabrik = "fabrik.scaffold:main"
+
+# ── Setuptools : packaging ──────────────────────────────────────────────
+[tool.setuptools.packages.find]
+include = ["fabrik*"]
+exclude = ["tests*", "docs*"]
+
+[tool.setuptools.package-data]
+# Inclut TOUS les templates (HTML, CSS, .tpl, .gitignore, etc.)
+# La pattern '**/*' couvre l'arborescence ; '**/.*' couvre les dotfiles.
+fabrik = [
+    "core/**/*",
+    "core/**/.*",
+    "core/.*",
+]

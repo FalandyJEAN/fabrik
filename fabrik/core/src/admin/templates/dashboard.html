@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Tableau de bord{% endblock %}
+{% block content %}
+<header class="page-head">
+    <div class="breadcrumbs">
+        {{ icon("home", 14) }}<span>Tableau de bord</span>
+    </div>
+    <div class="hero">
+        <div>
+            <h1 class="hero-title">{{ greeting }}, {{ user_name }}</h1>
+            <p class="hero-sub">Voici un apercu de votre application aujourd'hui.</p>
+        </div>
+        <div class="hero-actions">
+            <a href="/admin/users/new" class="btn btn-primary">{{ icon("plus", 16) }}<span>Nouvel utilisateur</span></a>
+            <a href="/docs" target="_blank" class="btn btn-ghost">{{ icon("code", 16) }}<span>API Docs</span></a>
+        </div>
+    </div>
+</header>
+
+<section class="kpi-strip">
+    <div class="kpi">
+        <div class="kpi-icon">{{ icon("layers", 18) }}</div>
+        <div>
+            <div class="kpi-label">Modeles enregistres</div>
+            <div class="kpi-value">{{ model_count }}</div>
+        </div>
+    </div>
+    <div class="kpi">
+        <div class="kpi-icon">{{ icon("database", 18) }}</div>
+        <div>
+            <div class="kpi-label">Enregistrements totaux</div>
+            <div class="kpi-value">{{ total_records }}</div>
+        </div>
+    </div>
+    <div class="kpi">
+        <div class="kpi-icon">{{ icon("activity", 18) }}</div>
+        <div>
+            <div class="kpi-label">Activite recente</div>
+            <div class="kpi-value">{{ activity|length }}</div>
+        </div>
+    </div>
+    <div class="kpi">
+        <div class="kpi-icon">{{ icon("shield", 18) }}</div>
+        <div>
+            <div class="kpi-label">Compte</div>
+            <div class="kpi-value kpi-text">Super-admin</div>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-head">
+        <h2 class="section-title">Collections</h2>
+        <p class="section-sub">Toutes les tables auto-decouvertes depuis SQLAlchemy</p>
+    </div>
+    <div class="card-grid">
+    {% for name, count in stats.items() %}
+        <a class="stat-card" href="/admin/{{ name }}">
+            <div class="stat-card-head">
+                <span class="stat-icon">{{ icon(table_icon(name), 18) }}</span>
+                <span class="stat-arrow">{{ icon("chevron-right", 16) }}</span>
+            </div>
+            <div class="stat-label">{{ name }}</div>
+            <div class="stat-value">{{ count }}</div>
+            <div class="stat-foot">{% if count == 0 %}aucun enregistrement{% elif count == 1 %}1 enregistrement{% else %}{{ count }} enregistrements{% endif %}</div>
+        </a>
+    {% endfor %}
+    </div>
+</section>
+
+<div class="two-col">
+    <section class="section panel">
+        <div class="section-head">
+            <h2 class="section-title">{{ icon("clock", 16) }} <span>Activite recente</span></h2>
+            <p class="section-sub">Les derniers enregistrements crees</p>
+        </div>
+        {% if activity %}
+            <ul class="activity-list">
+            {% for evt in activity %}
+                <li class="activity-item">
+                    <div class="activity-icon">{{ icon(table_icon(evt.table), 14) }}</div>
+                    <div class="activity-body">
+                        <a href="/admin/{{ evt.table }}/{{ evt.id }}" class="activity-label">{{ evt.label }}</a>
+                        <div class="activity-meta">
+                            <span class="badge badge-soft">{{ evt.table }}</span>
+                            <span class="muted">{{ relative_time(evt.created_at) }}</span>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <div class="empty-state-soft">
+                <div class="empty-icon">{{ icon("activity", 28) }}</div>
+                <div class="empty-title">Aucune activite pour l'instant</div>
+                <div class="empty-sub">Cree ton premier enregistrement pour le voir apparaitre ici.</div>
+            </div>
+        {% endif %}
+    </section>
+
+    <section class="section panel">
+        <div class="section-head">
+            <h2 class="section-title">{{ icon("zap", 16) }} <span>Demarrage rapide</span></h2>
+            <p class="section-sub">Quelques liens pour commencer</p>
+        </div>
+        <ul class="quick-list">
+            <li>
+                <a href="/admin/users/new" class="quick-item">
+                    <span class="quick-icon">{{ icon("user") }}</span>
+                    <span class="quick-text">
+                        <span class="quick-title">Creer un utilisateur</span>
+                        <span class="quick-sub">Ajouter un compte a la base</span>
+                    </span>
+                    <span class="quick-arrow">{{ icon("chevron-right", 14) }}</span>
+                </a>
+            </li>
+            <li>
+                <a href="/docs" target="_blank" class="quick-item">
+                    <span class="quick-icon">{{ icon("code") }}</span>
+                    <span class="quick-text">
+                        <span class="quick-title">Explorer l'API</span>
+                        <span class="quick-sub">Swagger interactif sur /docs</span>
+                    </span>
+                    <span class="quick-arrow">{{ icon("external", 14) }}</span>
+                </a>
+            </li>
+            <li>
+                <a href="/redoc" target="_blank" class="quick-item">
+                    <span class="quick-icon">{{ icon("book") }}</span>
+                    <span class="quick-text">
+                        <span class="quick-title">Documentation ReDoc</span>
+                        <span class="quick-sub">Reference statique de l'API</span>
+                    </span>
+                    <span class="quick-arrow">{{ icon("external", 14) }}</span>
+                </a>
+            </li>
+            <li>
+                <a href="/admin/users" class="quick-item">
+                    <span class="quick-icon">{{ icon("users") }}</span>
+                    <span class="quick-text">
+                        <span class="quick-title">Gerer les utilisateurs</span>
+                        <span class="quick-sub">Voir, editer, desactiver</span>
+                    </span>
+                    <span class="quick-arrow">{{ icon("chevron-right", 14) }}</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="tip-box">
+            <div class="tip-icon">{{ icon("zap", 14) }}</div>
+            <div>
+                <div class="tip-title">Astuce</div>
+                <div class="tip-text">Ajoute un module avec <code>python scaffold.py add &lt;nom&gt;</code> -- il apparaitra automatiquement ici.</div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

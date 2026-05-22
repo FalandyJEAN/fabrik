@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Connexion{% endblock %}
+{% block standalone %}
+<div class="login-page">
+    <div class="login-card">
+        <div class="login-logo">{{ icon("zap", 22) }}</div>
+        <h1>Console</h1>
+        <p class="subtitle">Connectez-vous a l'administration</p>
+        {% if error %}
+            <div class="alert">{{ icon("x", 14) }}<span>{{ error }}</span></div>
+        {% endif %}
+        <form method="post" action="/admin/login" class="login-form">
+            <div class="form-row">
+                <label for="email">Email</label>
+                <div class="input-with-icon">
+                    <span class="input-icon">{{ icon("user", 16) }}</span>
+                    <input type="email" id="email" name="email" required autofocus placeholder="vous@exemple.com">
+                </div>
+            </div>
+            <div class="form-row">
+                <label for="password">Mot de passe</label>
+                <div class="input-with-icon">
+                    <span class="input-icon">{{ icon("key", 16) }}</span>
+                    <input type="password" id="password" name="password" required placeholder="********">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">
+                <span>Se connecter</span>{{ icon("arrow-right", 16) }}
+            </button>
+        </form>
+        <div class="login-foot">
+            Acces reserve aux super-administrateurs
+        </div>
+    </div>
+</div>
+{% endblock %}

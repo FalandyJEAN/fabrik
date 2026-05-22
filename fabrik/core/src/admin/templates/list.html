@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}{{ table }}{% endblock %}
+{% block content %}
+<header class="page-head">
+    <div class="breadcrumbs">
+        <a href="/admin">{{ icon("home", 14) }}</a>
+        <span class="breadcrumb-sep">{{ icon("chevron-right", 12) }}</span>
+        <span>{{ table }}</span>
+    </div>
+    <div class="page-title-row">
+        <div class="page-title-block">
+            <h1 class="page-title">{{ icon(table_icon(table), 22) }} <span>{{ table }}</span></h1>
+            <p class="page-sub">{{ total }} enregistrement{% if total != 1 %}s{% endif %}{% if q %} &middot; resultats pour "{{ q }}"{% endif %}</p>
+        </div>
+        <div class="page-actions">
+            <a href="/admin/{{ table }}/export.csv{% if q %}?q={{ q }}{% endif %}" class="btn btn-ghost" title="Exporter en CSV">
+                {{ icon("file-text", 16) }}<span>CSV</span>
+            </a>
+            <a href="/admin/{{ table }}/new" class="btn btn-primary">{{ icon("plus", 16) }}<span>Nouveau</span></a>
+        </div>
+    </div>
+</header>
+
+<div class="toolbar">
+    <form method="get" class="search-bar">
+        <span class="search-icon">{{ icon("search", 16) }}</span>
+        <input type="text" name="q" value="{{ q }}" placeholder="Rechercher dans toutes les colonnes textuelles...">
+        {% if q %}<a href="/admin/{{ table }}" class="search-clear" title="Effacer">{{ icon("x", 14) }}</a>{% endif %}
+    </form>
+</div>
+
+<form id="bulk-form" method="post" action="/admin/{{ table }}/bulk-delete"
+      onsubmit="return confirm('Supprimer les ' + document.querySelectorAll('.row-check:checked').length + ' element(s) selectionne(s) ?')">
+
+<div id="bulk-bar" class="bulk-bar" hidden>
+    <div class="bulk-bar-left">
+        {{ icon("check", 14) }}
+        <span><strong id="bulk-n">0</strong> selectionne(s)</span>
+    </div>
+    <div class="bulk-bar-right">
+        <button type="button" id="bulk-cancel" class="btn btn-ghost btn-sm">Annuler</button>
+        <button type="submit" class="btn btn-danger btn-sm">
+            {{ icon("trash", 14) }}<span>Supprimer la selection</span>
+        </button>
+    </div>
+</div>
+
+<div class="card no-pad">
+<div class="table-wrapper">
+<table class="data-table">
+    <thead>
+        <tr>
+            <th class="th-check"><input type="checkbox" id="check-all" aria-label="Tout selectionner"></th>
+            {% for col in columns %}<th>{{ col }}</th>{% endfor %}
+            <th class="th-actions"></th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for item in items %}
+        <tr>
+            <td class="td-check"><input type="checkbox" name="ids" value="{{ item.id }}" class="row-check" aria-label="Selectionner cette ligne"></td>
+            {% for col in columns %}
+            <td>
+                {% set v = item[col] %}
+                {% if v is none %}
+                    <span class="muted">&mdash;</span>
+                {% elif v is sameas true %}
+                    <span class="badge badge-ok">{{ icon("check", 12) }} oui</span>
+                {% elif v is sameas false %}
+                    <span class="badge badge-off">{{ icon("x", 12) }} non</span>
+                {% elif col in fk_maps %}
+                    {% set fk = fk_maps[col] %}
+                    <a class="fk-link" href="/admin/{{ fk.table }}/{{ v }}">{{ fk.map.get(v|string, v|string) }}</a>
+                {% elif col == "id" %}
+                    <code class="mono-id" title="{{ v }}">{{ v|string|truncate(10, true, "...") }}</code>
+                {% elif v is string and v|length == 36 and "-" in v %}
+                    <code class="mono-id" title="{{ v }}">{{ v[:8] }}...</code>
+                {% else %}
+                    {{ v|string|truncate(80) }}
+                {% endif %}
+            </td>
+            {% endfor %}
+            <td class="actions">
+                <a href="/admin/{{ table }}/{{ item.id }}" class="icon-btn" title="Editer">{{ icon("edit", 16) }}</a>
+            </td>
+        </tr>
+    {% else %}
+        <tr><td colspan="{{ columns|length + 2 }}">
+            <div class="empty-state">
+                <div class="empty-icon">{{ icon(table_icon(table), 32) }}</div>
+                <div class="empty-title">Aucun enregistrement</div>
+                <div class="empty-sub">{% if q %}Aucun resultat pour "{{ q }}". <a href="/admin/{{ table }}">Effacer le filtre</a>{% else %}Commence par creer un premier {{ table[:-1] if table.endswith("s") else table }}.{% endif %}</div>
+                {% if not q %}<a href="/admin/{{ table }}/new" class="btn btn-primary btn-sm">{{ icon("plus", 14) }}<span>Creer</span></a>{% endif %}
+            </div>
+        </td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+</div>
+
+</form>
+
+{% if pages > 1 %}
+<div class="pagination">
+    <div class="pagination-info">Page {{ page }} sur {{ pages }}</div>
+    <div class="pagination-controls">
+        {% if page > 1 %}<a href="?page={{ page - 1 }}&q={{ q }}" class="icon-btn">{{ icon("arrow-left", 14) }}</a>{% else %}<span class="icon-btn icon-btn-disabled">{{ icon("arrow-left", 14) }}</span>{% endif %}
+        {% if page < pages %}<a href="?page={{ page + 1 }}&q={{ q }}" class="icon-btn">{{ icon("arrow-right", 14) }}</a>{% else %}<span class="icon-btn icon-btn-disabled">{{ icon("arrow-right", 14) }}</span>{% endif %}
+    </div>
+</div>
+{% endif %}
+
+<script>
+(function() {
+    var checkAll = document.getElementById('check-all');
+    var checks   = document.querySelectorAll('.row-check');
+    var bar      = document.getElementById('bulk-bar');
+    var counter  = document.getElementById('bulk-n');
+    var cancel   = document.getElementById('bulk-cancel');
+    if (!bar) return;
+    function refresh() {
+        var sel = document.querySelectorAll('.row-check:checked').length;
+        counter.textContent = sel;
+        bar.hidden = sel === 0;
+        if (checkAll) {
+            checkAll.indeterminate = sel > 0 && sel < checks.length;
+            checkAll.checked       = sel === checks.length && checks.length > 0;
+        }
+    }
+    if (checkAll) checkAll.addEventListener('change', function() {
+        checks.forEach(function(c) { c.checked = checkAll.checked; });
+        refresh();
+    });
+    checks.forEach(function(c) { c.addEventListener('change', refresh); });
+    if (cancel) cancel.addEventListener('click', function() {
+        checks.forEach(function(c) { c.checked = false; });
+        if (checkAll) checkAll.checked = false;
+        refresh();
+    });
+})();
+</script>
+{% endblock %}

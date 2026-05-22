@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin{% endblock %} | Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/admin/static/admin.css">
+</head>
+<body>
+{% if user %}
+<header class="mobile-topbar">
+    <button class="mobile-toggle" id="sidebar-toggle" type="button" aria-label="Ouvrir le menu">
+        {{ icon("menu", 20) }}
+    </button>
+    <div class="mobile-brand">
+        <span class="brand-mark brand-mark-sm">{{ icon("zap", 14) }}</span>
+        <span>Console</span>
+    </div>
+</header>
+<div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+<div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <span class="brand-mark">{{ icon("zap", 18) }}</span>
+            <div class="brand-text">
+                <div class="brand-title">Console</div>
+                <div class="brand-sub">Administration</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">General</div>
+                <a href="/admin" class="nav-item {% if not table %}active{% endif %}">
+                    {{ icon("home") }}<span>Tableau de bord</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Modeles <span class="nav-count">{{ models|length }}</span></div>
+                {% for name in models.keys() %}
+                    <a href="/admin/{{ name }}" class="nav-item {% if table == name %}active{% endif %}">
+                        {{ icon(table_icon(name)) }}<span>{{ name }}</span>
+                    </a>
+                {% endfor %}
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Outils</div>
+                <a href="/docs" target="_blank" class="nav-item">
+                    {{ icon("code") }}<span>API Swagger</span>
+                    <span class="nav-meta">{{ icon("external", 12) }}</span>
+                </a>
+                <a href="/redoc" target="_blank" class="nav-item">
+                    {{ icon("book") }}<span>ReDoc</span>
+                    <span class="nav-meta">{{ icon("external", 12) }}</span>
+                </a>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-card">
+                <div class="user-avatar">{{ user.email[0]|upper }}</div>
+                <div class="user-info">
+                    <div class="user-name">{{ user.email.split("@")[0] }}</div>
+                    <div class="user-role">Super-admin</div>
+                </div>
+                <a href="/admin/logout" class="user-logout" title="Deconnexion">{{ icon("logout", 16) }}</a>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main">
+        {% block content %}{% endblock %}
+    </main>
+</div>
+<script>
+(function() {
+    var sidebar  = document.getElementById('sidebar');
+    var backdrop = document.getElementById('sidebar-backdrop');
+    var toggle   = document.getElementById('sidebar-toggle');
+    if (!sidebar || !toggle) return;
+    function close() {
+        sidebar.classList.remove('open');
+        if (backdrop) backdrop.classList.remove('open');
+        document.body.classList.remove('no-scroll');
+    }
+    function open() {
+        sidebar.classList.add('open');
+        if (backdrop) backdrop.classList.add('open');
+        document.body.classList.add('no-scroll');
+    }
+    toggle.addEventListener('click', function() {
+        sidebar.classList.contains('open') ? close() : open();
+    });
+    if (backdrop) backdrop.addEventListener('click', close);
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') close();
+    });
+    // Fermer apres clic sur un lien (UX mobile)
+    sidebar.querySelectorAll('.nav-item').forEach(function(a) {
+        a.addEventListener('click', function() {
+            if (window.innerWidth <= 768) close();
+        });
+    });
+})();
+</script>
+{% else %}
+{% block standalone %}{% endblock %}
+{% endif %}
+</body>
+</html>
