@@ -1,7 +1,0 @@
-__pycache__/
-*.pyc
-*.db
-.env
-venv/
-alembic/versions/
-.pytest_cache/
