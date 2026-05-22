@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -29,14 +30,21 @@ async def lifespan(app: FastAPI):
     # Pool Redis pour ARQ (background tasks)
     # Si Redis est down, l'API marche quand meme : les routes qui veulent
     # enqueue renvoient 503 (voir src/tasks.py:get_arq).
+    # asyncio.wait_for(timeout=2) protege contre un hang (Redis injoignable
+    # mais TCP qui ne fail pas vite, ex: derriere un firewall qui drop).
+    app.state.arq_pool = None
     try:
-        app.state.arq_pool = await create_pool(
-            RedisSettings.from_dsn(settings.REDIS_URL)
+        redis_settings = RedisSettings.from_dsn(settings.REDIS_URL)
+        # Force un conn_timeout court pour fail-fast en CI / dev sans Redis
+        redis_settings.conn_timeout = 2
+        app.state.arq_pool = await asyncio.wait_for(
+            create_pool(redis_settings),
+            timeout=3.0,
         )
         logger.info("ARQ pool connecte a %s", settings.REDIS_URL)
-    except Exception as e:
-        logger.warning("Redis indisponible (%s) -- background tasks desactives", e)
-        app.state.arq_pool = None
+    except (asyncio.TimeoutError, Exception) as e:
+        logger.warning("Redis indisponible (%s) -- background tasks desactives",
+                       type(e).__name__)
 
     yield
 
