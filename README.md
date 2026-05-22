@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/logo.png" alt="Fabrik logo" width="200" />
+  <img src="https://raw.githubusercontent.com/FalandyJEAN/fabrik/main/docs/assets/logo.png" alt="Fabrik logo" width="200" />
 </p>
 
 <h1 align="center">Fabrik</h1>
@@ -10,19 +10,25 @@
   background tasks (ARQ), migrations Alembic, CORS strict, responsive.
 </p>
 
-[![PyPI version](https://img.shields.io/pypi/v/fabrik-cli.svg)](https://pypi.org/project/fabrik-cli/)
-[![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
-[![Fabrik CI](https://github.com/FalandyJEAN/fabrik/actions/workflows/ci.yml/badge.svg)](https://github.com/FalandyJEAN/fabrik/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<p align="center">
+  <a href="https://pypi.org/project/fabrik-fastapi/"><img src="https://img.shields.io/pypi/v/fabrik-fastapi.svg" alt="PyPI version" /></a>
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.13+-blue.svg" alt="Python 3.13+" /></a>
+  <a href="https://github.com/FalandyJEAN/fabrik/actions/workflows/ci.yml"><img src="https://github.com/FalandyJEAN/fabrik/actions/workflows/ci.yml/badge.svg" alt="Fabrik CI" /></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
+</p>
 
-**Version :** `1.0.0` &nbsp;&middot;&nbsp; **Auteur :** Falandy Jean &nbsp;&middot;&nbsp; **Licence :** MIT
+<p align="center">
+  <strong>Version :</strong> <code>1.0.1</code> &nbsp;&middot;&nbsp;
+  <strong>Auteur :</strong> Falandy Jean &nbsp;&middot;&nbsp;
+  <strong>Licence :</strong> MIT
+</p>
 
 ---
 
 ## Installation
 
 ```bash
-pip install fabrik-cli
+pip install fabrik-fastapi
 ```
 
 Verifier l'installation :

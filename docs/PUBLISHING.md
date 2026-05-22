@@ -1,6 +1,6 @@
 # Publier Fabrik sur PyPI
 
-Guide pas a pas pour publier une nouvelle version de `fabrik-cli` sur PyPI.
+Guide pas a pas pour publier une nouvelle version de `fabrik-fastapi` sur PyPI.
 
 **Pre-requis :**
 - Un compte sur https://pypi.org (et idealement sur https://test.pypi.org)
@@ -66,8 +66,8 @@ python -m build
 ```
 
 Tu dois obtenir dans `dist/` :
-- `fabrik_cli-1.1.0.tar.gz`     (source)
-- `fabrik_cli-1.1.0-py3-none-any.whl`  (wheel universelle)
+- `fabrik_fastapi-1.1.0.tar.gz`     (source)
+- `fabrik_fastapi-1.1.0-py3-none-any.whl`  (wheel universelle)
 
 Verifier la metadata :
 
@@ -95,7 +95,7 @@ python -m venv /tmp/test-fabrik
 source /tmp/test-fabrik/bin/activate      # ou Scripts\activate sur Windows
 pip install --index-url https://test.pypi.org/simple/ \
             --extra-index-url https://pypi.org/simple/ \
-            fabrik-cli
+            fabrik-fastapi
 fabrik --version
 fabrik new /tmp/demo-projet --no-input
 deactivate && rm -rf /tmp/test-fabrik
@@ -116,11 +116,11 @@ Entre ton token PyPI quand demande.
 Verification :
 
 ```bash
-pip install --upgrade fabrik-cli
+pip install --upgrade fabrik-fastapi
 fabrik --version       # doit afficher la nouvelle version
 ```
 
-Ta page : https://pypi.org/project/fabrik-cli/
+Ta page : https://pypi.org/project/fabrik-fastapi/
 
 ---
 

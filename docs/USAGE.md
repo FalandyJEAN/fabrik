@@ -41,7 +41,7 @@ Optionnel mais recommande :
 ### Via pip (recommande)
 
 ```bash
-pip install fabrik-cli
+pip install fabrik-fastapi
 ```
 
 Cela installe la commande globale `fabrik` (et `python -m fabrik` comme alternative).
@@ -69,7 +69,7 @@ pip install -e .       # mode editable
 ### Mise a jour
 
 ```bash
-pip install -U fabrik-cli
+pip install -U fabrik-fastapi
 ```
 
 ---
@@ -349,7 +349,7 @@ en haut a gauche).
 ### Demarrer un MVP en 5 minutes
 
 ```bash
-pip install fabrik-cli
+pip install fabrik-fastapi
 fabrik new mon-mvp
 cd mon-mvp
 venv\Scripts\activate
@@ -398,7 +398,7 @@ python -m alembic upgrade head
 
 ```bash
 # Met a jour le package Fabrik lui-meme
-pip install -U fabrik-cli
+pip install -U fabrik-fastapi
 
 # Applique les patches a chaque projet
 cd mon-mvp
@@ -428,7 +428,7 @@ git), edite `fabrik/core/<chemin>` :
 Apres modification, **lance `fabrik test-self`** pour verifier que les
 futurs projets generes demarrent encore.
 
-Si tu as installe via `pip install fabrik-cli`, les templates sont dans
+Si tu as installe via `pip install fabrik-fastapi`, les templates sont dans
 le dossier site-packages (`<venv>/lib/pythonX.Y/site-packages/fabrik/core/`).
 Pour customiser durablement, mieux vaut cloner le repo et installer en mode
 editable.
@@ -555,9 +555,9 @@ class WorkerSettings:
 
 ## 11. FAQ
 
-**Q : Pourquoi `pip install fabrik-cli` mais `fabrik` comme commande ?**
+**Q : Pourquoi `pip install fabrik-fastapi` mais `fabrik` comme commande ?**
 
-R : Convention PyPI : le nom du paquet sur PyPI est `fabrik-cli` (plus
+R : Convention PyPI : le nom du paquet sur PyPI est `fabrik-fastapi` (plus
 specifique, evite les collisions), mais une fois installe, il expose la
 commande courte `fabrik` (definie dans `pyproject.toml [project.scripts]`).
 Tu peux aussi utiliser `python -m fabrik` comme alternative.
@@ -608,7 +608,7 @@ du projet jetable. En CI, le cache pip de GitHub Actions reduit ca a ~20s.
 
 **Q : Comment desinstaller Fabrik ?**
 
-R : `pip uninstall fabrik-cli`. Les projets que tu as deja generes restent
+R : `pip uninstall fabrik-fastapi`. Les projets que tu as deja generes restent
 intacts (ils ne dependent pas de Fabrik au runtime, seulement de leurs propres
 dependances dans `requirements.txt`).
 

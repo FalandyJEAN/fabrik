@@ -46,7 +46,7 @@ fabrik/                          ← repo GitHub
     └── core/                    Templates copies dans chaque projet
 ```
 
-Quand l'utilisateur fait `pip install fabrik-cli`, c'est le dossier
+Quand l'utilisateur fait `pip install fabrik-fastapi`, c'est le dossier
 **inner `fabrik/`** qui est installe dans le `site-packages` de son Python.
 La commande `fabrik` est creee par l'entry point `[project.scripts]` de
 `pyproject.toml` qui pointe vers `fabrik.scaffold:main`.

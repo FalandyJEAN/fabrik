@@ -3,8 +3,8 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "fabrik-cli"
-version = "1.0.0"
+name = "fabrik-fastapi"
+version = "1.0.1"
 description = "Generateur de projet FastAPI async + opinionated (auth JWT, admin UI, ARQ, tests)"
 readme = "README.md"
 license = { text = "MIT" }
