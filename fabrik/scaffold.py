@@ -1039,10 +1039,12 @@ def cmd_test_self(keep: bool = False) -> bool:
             os.chdir(old_cwd)
         record("fabrik add articles", "ok", time.time() - t0)
 
-        # Verify generated module parses
+        # Verify generated module parses.
+        # Note : cmd_add normalise au singulier ("articles" -> "article"),
+        # donc le dossier cree est src/article/, pas src/articles/.
         t0 = time.time()
         import ast
-        article_dir = project_dir / "src" / "articles"
+        article_dir = project_dir / "src" / "article"
         files_ok = True
         for fname in ["models.py", "schemas.py", "service.py", "router.py", "__init__.py"]:
             f = article_dir / fname
@@ -1055,9 +1057,9 @@ def cmd_test_self(keep: bool = False) -> bool:
                 files_ok = False
                 break
         if files_ok:
-            record("Module articles/ (5 fichiers OK)", "ok", time.time() - t0)
+            record("Module article/ (5 fichiers OK)", "ok", time.time() - t0)
         else:
-            record("Module articles/ (5 fichiers OK)", "fail", time.time() - t0)
+            record("Module article/ (5 fichiers OK)", "fail", time.time() - t0)
             return False
 
         return True
