@@ -210,12 +210,22 @@ def build_files(title: str, port: int, db_url: str) -> dict:
         files[target] = Template(raw).substitute(**tpl_subst)
 
     # 2. Fichiers statiques (copies directes)
+    # Patterns a ignorer : caches Python crees par pip install (byte-compilation),
+    # backups laisses par `fabrik upgrade`, et fichiers temporaires divers.
+    SKIP_DIRS = {"__pycache__", ".pytest_cache", ".mypy_cache"}
+    SKIP_SUFFIXES = {".pyc", ".pyo", ".pyd", ".bak"}
+
     for path in core_dir.rglob("*"):
         if not path.is_file():
             continue
         rel = path.relative_to(core_dir)
         # Skip _templates (deja traites)
         if rel.parts[0] == "_templates":
+            continue
+        # Skip caches Python et bytecode (introduits par pip lors de l'install)
+        if any(part in SKIP_DIRS for part in rel.parts):
+            continue
+        if path.suffix in SKIP_SUFFIXES:
             continue
         files[str(rel).replace(os.sep, "/")] = path.read_text(encoding="utf-8")
 
