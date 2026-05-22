@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fabrik-fastapi"
-version = "1.0.2"
+version = "1.0.3"
 description = "Generateur de projet FastAPI async + opinionated (auth JWT, admin UI, ARQ, tests)"
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
 authors = [
     { name = "Falandy Jean", email = "falandyjean@gmail.com" },
 ]
@@ -19,7 +19,6 @@ keywords = [
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
