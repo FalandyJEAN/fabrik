@@ -23,9 +23,11 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Cree les tables au demarrage (utile en dev ; en prod, prefere Alembic)
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    if settings.DATABASE_URL.startswith("sqlite"):
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+    else:
+        logger.warning("Base de donnees non-SQLite : create_all ignore. Utilisez Alembic (alembic upgrade head).")
 
     # Pool Redis pour ARQ (background tasks)
     # Si Redis est down, l'API marche quand meme : les routes qui veulent

@@ -1,11 +1,11 @@
 import logging
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from . import schemas, service
 from src.database import get_db
 from src.core.security import (
     verify_password, create_access_token, create_refresh_token,
-    decode_refresh_token, get_current_user
+    decode_refresh_token, get_current_user, check_login_rate_limit
 )
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,14 @@ async def register(user: schemas.UserCreate, db: AsyncSession = Depends(get_db))
 
 
 @router.post("/login", response_model=schemas.Token)
-async def login(credentials: schemas.UserLogin, db: AsyncSession = Depends(get_db)):
+async def login(credentials: schemas.UserLogin, request: Request, db: AsyncSession = Depends(get_db)):
+    ip = request.client.host if request.client else "unknown"
+    if not check_login_rate_limit(ip):
+        raise HTTPException(
+            status_code=429,
+            detail="Trop de tentatives. Reessayez dans 5 minutes.",
+            headers={"Retry-After": "300"},
+        )
     user = await service.get_user_by_email(db, credentials.email)
     if not user or not verify_password(credentials.password, user.password):
         logger.warning("Tentative de connexion echouee pour : %s", credentials.email)

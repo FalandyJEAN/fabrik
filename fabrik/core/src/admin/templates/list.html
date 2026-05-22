@@ -31,6 +31,7 @@
 
 <form id="bulk-form" method="post" action="/admin/{{ table }}/bulk-delete"
       onsubmit="return confirm('Supprimer les ' + document.querySelectorAll('.row-check:checked').length + ' element(s) selectionne(s) ?')">
+    <input type="hidden" name="_csrf_token" value="{{ get_csrf(request) }}">
 
 <div id="bulk-bar" class="bulk-bar" hidden>
     <div class="bulk-bar-left">

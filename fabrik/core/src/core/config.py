@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     BACKEND_CORS_ORIGINS: str = "http://localhost:3000"
     REDIS_URL: str = "redis://localhost:6379"
+    COOKIE_SECURE: bool = True
 
     @property
     def async_database_url(self) -> str:

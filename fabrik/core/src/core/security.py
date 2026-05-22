@@ -1,6 +1,8 @@
 import bcrypt
 import jwt
 import logging
+import time
+from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -9,6 +11,22 @@ from src.core.config import settings
 logger = logging.getLogger(__name__)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/login")
 ALGORITHM = "HS256"
+
+_login_attempts: dict[str, list[float]] = defaultdict(list)
+LOGIN_MAX_ATTEMPTS = 5
+LOGIN_WINDOW_SECONDS = 300
+
+
+def check_login_rate_limit(ip: str) -> bool:
+    """Returns True if the attempt is allowed, False if the IP is rate-limited."""
+    now = time.time()
+    window_start = now - LOGIN_WINDOW_SECONDS
+    recent = [t for t in _login_attempts[ip] if t > window_start]
+    _login_attempts[ip] = recent
+    if len(recent) >= LOGIN_MAX_ATTEMPTS:
+        return False
+    _login_attempts[ip].append(now)
+    return True
 
 
 def get_password_hash(password: str) -> str:

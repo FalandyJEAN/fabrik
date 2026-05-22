@@ -21,6 +21,7 @@
 </header>
 
 <form method="post" action="{{ action }}" class="card model-form">
+    <input type="hidden" name="_csrf_token" value="{{ get_csrf(request) }}">
     <div class="model-form-body">
     {% for field in fields %}
         <div class="form-row {% if field.type == 'checkbox' %}form-row-inline{% endif %}">
@@ -66,6 +67,8 @@
 </form>
 {% if not is_new %}
 <form id="delete-form" method="post" action="/admin/{{ table }}/{{ item_id }}/delete"
-      onsubmit="return confirm('Supprimer definitivement ?')"></form>
+      onsubmit="return confirm('Supprimer definitivement ?')">
+    <input type="hidden" name="_csrf_token" value="{{ get_csrf(request) }}">
+</form>
 {% endif %}
 {% endblock %}

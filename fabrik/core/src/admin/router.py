@@ -1,6 +1,7 @@
 import csv
 import io
 import logging
+import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 import jwt
@@ -13,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_db, Base
 from src.users.models import User
-from src.core.security import verify_password, get_password_hash
+from src.core.security import verify_password, get_password_hash, check_login_rate_limit
 from src.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -23,6 +24,7 @@ ADMIN_COOKIE = "admin_session"
 HIDDEN_FIELDS = {"password"}
 READONLY_FIELDS = {"id", "created_at", "updated_at"}
 FK_DISPLAY_CANDIDATES = ("email", "name", "title", "label", "username")
+MAX_EXPORT_ROWS = 10_000
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -120,6 +122,32 @@ def greeting() -> str:
 templates.env.globals["icon"] = icon
 templates.env.globals["table_icon"] = table_icon
 templates.env.globals["relative_time"] = relative_time
+
+
+def _get_csrf_from_request(request: Request) -> str:
+    """Decodes the admin JWT to retrieve the CSRF claim (no DB hit)."""
+    token = request.cookies.get(ADMIN_COOKIE)
+    if not token:
+        return ""
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        return payload.get("csrf", "")
+    except Exception:
+        return ""
+
+
+async def verify_csrf(request: Request):
+    """Dependency: rejects POST requests with a missing or mismatched CSRF token."""
+    expected = _get_csrf_from_request(request)
+    if not expected:
+        raise HTTPException(status_code=403, detail="Session invalide")
+    form = await request.form()
+    provided = form.get("_csrf_token", "")
+    if not secrets.compare_digest(expected, provided):
+        raise HTTPException(status_code=403, detail="Token CSRF invalide")
+
+
+templates.env.globals["get_csrf"] = _get_csrf_from_request
 
 
 def get_admin_models() -> dict:
@@ -256,6 +284,14 @@ async def login_page(request: Request):
 
 @router.post("/login")
 async def login_submit(request: Request, db: AsyncSession = Depends(get_db)):
+    ip = request.client.host if request.client else "unknown"
+    if not check_login_rate_limit(ip):
+        logger.warning("Rate limit admin depasse : %s", ip)
+        return templates.TemplateResponse(
+            request, "login.html",
+            {"error": "Trop de tentatives. Reessayez dans 5 minutes."},
+            status_code=429,
+        )
     form = await request.form()
     email = form.get("email", "")
     password = form.get("password", "")
@@ -268,12 +304,17 @@ async def login_submit(request: Request, db: AsyncSession = Depends(get_db)):
             "login.html",
             {"error": "Identifiants invalides ou compte non-administrateur."},
         )
+    csrf = secrets.token_hex(32)
     token = jwt.encode(
-        {"sub": user.id, "exp": datetime.now(timezone.utc) + timedelta(hours=8)},
+        {"sub": user.id, "exp": datetime.now(timezone.utc) + timedelta(hours=8), "csrf": csrf},
         settings.SECRET_KEY, algorithm="HS256",
     )
     response = RedirectResponse(url="/admin", status_code=303)
-    response.set_cookie(ADMIN_COOKIE, token, httponly=True, max_age=8 * 3600, samesite="lax")
+    response.set_cookie(
+        ADMIN_COOKIE, token,
+        httponly=True, max_age=8 * 3600,
+        samesite="strict", secure=settings.COOKIE_SECURE,
+    )
     logger.info("Connexion admin : %s", user.email)
     return response
 
@@ -419,6 +460,7 @@ async def new_view(
 async def create_item(
     table: str, request: Request,
     db: AsyncSession = Depends(get_db), user: User = Depends(require_admin),
+    _csrf: None = Depends(verify_csrf),
 ):
     models = get_admin_models()
     if table not in models:
@@ -445,6 +487,7 @@ async def create_item(
 async def bulk_delete(
     table: str, request: Request,
     db: AsyncSession = Depends(get_db), user: User = Depends(require_admin),
+    _csrf: None = Depends(verify_csrf),
 ):
     models = get_admin_models()
     if table not in models:
@@ -472,7 +515,7 @@ async def export_csv(
     Model = models[table]
     cols = [c.name for c in Model.__table__.columns if c.name not in HIDDEN_FIELDS]
 
-    rows = (await db.execute(select(Model))).scalars().all()
+    rows = (await db.execute(select(Model).limit(MAX_EXPORT_ROWS))).scalars().all()
 
     buf = io.StringIO()
     writer = csv.writer(buf)
@@ -520,6 +563,7 @@ async def detail_view(
 async def update_item(
     table: str, item_id: str, request: Request,
     db: AsyncSession = Depends(get_db), user: User = Depends(require_admin),
+    _csrf: None = Depends(verify_csrf),
 ):
     models = get_admin_models()
     if table not in models:
@@ -547,8 +591,9 @@ async def update_item(
 
 @router.post("/{table}/{item_id}/delete")
 async def delete_item(
-    table: str, item_id: str,
+    table: str, item_id: str, request: Request,
     db: AsyncSession = Depends(get_db), user: User = Depends(require_admin),
+    _csrf: None = Depends(verify_csrf),
 ):
     models = get_admin_models()
     if table not in models:

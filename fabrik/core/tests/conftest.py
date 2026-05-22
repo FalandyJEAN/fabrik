@@ -6,7 +6,7 @@ import os
 
 # Forcer un environnement de test AVANT d'importer settings
 os.environ.setdefault("SECRET_KEY", "test-secret-do-not-use-in-prod")
-os.environ.setdefault("DATABASE_URL", "sqlite:///./test.db")
+os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
